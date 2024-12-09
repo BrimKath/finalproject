@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #word {
+            font-size: 2em;
+            letter-spacing: 2px;
+            margin: 20px;
+        }
+
+        .letter {
+            display: inline-block;
+            width: 30px;
+            text-align: center;
+            border-bottom: 2px solid black;
+            font-size: 2em;
+        }
+
+        #wrong-guesses {
+            margin-top: 20px;
+        }
+
+        #wrong-letters {
+            font-size: 1.5em;
+            color: red;
+        }
+
+        #hangman-image {
+            margin-top: 20px;
+            height: 200px;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        #reset {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Hangman Game</h1>
+
+    <div id="hangman-container">
+        <img id="hangman-image" src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Hangman-0.svg" alt="Hangman">
+        <div id="word"></div>
+        <div id="wrong-guesses">
+            Wrong guesses: <span id="wrong-letters"></span> (Wrong Guesses Left: <span id="guesses-left">10</span>)
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <input type="text" id="guess-input" maxlength="1" placeholder="Enter a letter" />
+    <button onclick="makeGuess()">Guess</button>
+
+    <button id="reset" onclick="resetGame()">Play Again</button>
+
+    <script>
+        const words = ["javascript", "html", "css", "python", "programming", "developer", "algorithm"];
+        let selectedWord = words[Math.floor(Math.random() * words.length)];
+        let guessedLetters = [];
+        let wrongLetters = [];
+        const maxWrongGuesses = 10;
+
+        const wordElement = document.getElementById("word");
+        const wrongLettersElement = document.getElementById("wrong-letters");
+        const guessesLeftElement = document.getElementById("guesses-left");
+        const messageElement = document.getElementById("message");
+        const guessInput = document.getElementById("guess-input");
+        const hangmanImage = document.getElementById("hangman-image");
+        const resetButton = document.getElementById("reset");
+
+        // Display the word with blanks or guessed letters
+        function displayWord() {
+            wordElement.innerHTML = selectedWord.split('').map(letter => 
+                guessedLetters.includes(letter) ? letter : "_"
+            ).join(" ");
+        }
+
+        // Update wrong letters and remaining guesses
+        function updateWrongLetters() {
+            wrongLettersElement.textContent = wrongLetters.join(", ");
+            guessesLeftElement.textContent = maxWrongGuesses - wrongLetters.length;
+            hangmanImage.src = `https://upload.wikimedia.org/wikipedia/commons/a/a1/Hangman-${wrongLetters.length}.svg`;
+        }
+
+        // Handle the guess input
+        function makeGuess() {
+            const guess = guessInput.value.toLowerCase();
+            guessInput.value = "";
+            
+            // Prevent guessing the same letter again
+            if (guessedLetters.includes(guess) || wrongLetters.includes(guess)) {
+                return;
+            }
+
+            if (selectedWord.includes(guess)) {
+                guessedLetters.push(guess);
+            } else {
+                wrongLetters.push(guess);
+            }
+
+            displayWord();
+            updateWrongLetters();
+
+            // Check for win or loss
+            if (wrongLetters.length >= maxWrongGuesses) {
+                messageElement.textContent = "You lost! The word was: " + selectedWord;
+                gameOver();
+            } else if (!wordElement.innerText.includes("_")) {
+                messageElement.textContent = "Congratulations, you won!";
+                gameOver();
+            }
+        }
+
+        // End the game and disable further guesses
+        function gameOver() {
+            guessInput.disabled = true;
+            document.querySelector("button").disabled = true;
+            resetButton.style.display = "inline-block";
+        }
+
+        // Reset the game for a new round
+        function resetGame() {
+            selectedWord = words[Math.floor(Math.random() * words.length)];
+            guessedLetters = [];
+            wrongLetters = [];
+            messageElement.textContent = "";
+            displayWord();
+            updateWrongLetters();
+            guessInput.disabled = false;
+            document.querySelector("button").disabled = false;
+            resetButton.style.display = "none";
+        }
+
+        // Initialize the game
+        displayWord();
+        updateWrongLetters();
+    </script>
+</body>
+</html>
+
